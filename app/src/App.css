@@ -1,0 +1,558 @@
+/**
+ * App.css
+ * -------
+ * Main stylesheet for the candlestick chart application.
+ * Uses CSS custom properties for consistent theming.
+ *
+ * Layout: Two-column dashboard (sidebar + main content)
+ * Theme: Dark mode with subtle glassmorphism effects
+ */
+
+/* ============================================================================
+   CSS VARIABLES
+   ============================================================================ */
+
+:root {
+  /* Colors */
+  --color-bg: #0a0f1c;
+  --color-surface: #111827;
+  --color-surface-light: #1f2937;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-light: rgba(255, 255, 255, 0.12);
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-text-dim: #64748b;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-accent: #8b5cf6;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Border radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================================
+   LAYOUT
+   ============================================================================ */
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: var(--space-lg);
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Responsive: Stack on smaller screens */
+@media (max-width: 900px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   SIDEBAR
+   ============================================================================ */
+
+.sidebar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  height: fit-content;
+  position: sticky;
+  top: var(--space-lg);
+}
+
+.sidebar-header {
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-md);
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sidebar-subtitle {
+  font-size: 12px;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-search {
+  margin-bottom: var(--space-md);
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--color-surface-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.search-input::placeholder {
+  color: var(--color-text-dim);
+}
+
+.symbol-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.symbol-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.symbol-item:hover {
+  background: var(--color-surface-light);
+  color: var(--color-text);
+}
+
+.symbol-item.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.symbol-arrow {
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.symbol-item:hover .symbol-arrow,
+.symbol-item.active .symbol-arrow {
+  opacity: 1;
+}
+
+.symbol-item.active .symbol-arrow {
+  transform: translateX(2px);
+}
+
+.no-results {
+  padding: var(--space-md);
+  text-align: center;
+  color: var(--color-text-dim);
+  font-size: 13px;
+}
+
+/* ============================================================================
+   MAIN CONTENT
+   ============================================================================ */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+
+.header {
+  margin-bottom: var(--space-sm);
+}
+
+.title-block h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.symbol-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.title-block p {
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* ============================================================================
+   STATUS BAR
+   ============================================================================ */
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-text-dim);
+}
+
+.badge.online .dot {
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+}
+
+.badge.connecting .dot {
+  background: var(--color-warning);
+  animation: pulse 1.5s infinite;
+}
+
+.badge.offline .dot,
+.badge.error .dot {
+  background: var(--color-error);
+}
+
+.badge.info .dot {
+  background: var(--color-primary);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ============================================================================
+   CARDS
+   ============================================================================ */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.controls-card {
+  padding: var(--space-md) var(--space-lg);
+}
+
+/* ============================================================================
+   FORM CONTROLS
+   ============================================================================ */
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.field label {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.hint {
+  color: var(--color-text-dim);
+  font-size: 11px;
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-surface-light);
+  color: var(--color-text);
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-end;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.button.primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.button.primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.button.secondary {
+  background: var(--color-surface-light);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-light);
+}
+
+.button.secondary:hover:not(:disabled) {
+  background: var(--color-border-light);
+  color: var(--color-text);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   INFO ROW
+   ============================================================================ */
+
+.info-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 6px 12px;
+  background: var(--color-surface-light);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.pill strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.warning {
+  margin-top: var(--space-md);
+  padding: 12px var(--space-md);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error {
+  margin-top: var(--space-md);
+  padding: 12px var(--space-md);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+/* ============================================================================
+   CHART
+   ============================================================================ */
+
+.chart-card {
+  position: relative;
+  height: 500px;
+  padding: var(--space-md);
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.chart-overlay {
+  position: absolute;
+  inset: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  background: rgba(10, 15, 28, 0.9);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.loader {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   STATS GRID
+   ============================================================================ */
+
+.grid {
+  display: grid;
+  gap: var(--space-sm);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-light);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  color: var(--color-primary);
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  display: block;
+  color: var(--color-text-dim);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ============================================================================
+   HELPER TEXT
+   ============================================================================ */
+
+.helper {
+  color: var(--color-text-dim);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
